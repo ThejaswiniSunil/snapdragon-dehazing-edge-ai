@@ -1,0 +1,3 @@
+qai-hub
+qai-hub-models[llama-v3-2-1b-instruct]
+huggingface_hub
