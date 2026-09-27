@@ -1,116 +1,211 @@
-# ⚡ Snapdragon Edge AI Deployment
+# ⚡ Snapdragon Edge AI & On-Device AI Deployment
 
-### From Trained Models to Hardware-Accelerated NPU Inference
+### From Trained Models to Hardware-Accelerated Vision and Generative AI
 
-**Production-oriented Edge AI deployment experiments on Qualcomm Snapdragon X Elite — covering model export, ONNX conversion, QNN compilation, NPU execution, and on-device performance profiling.**
+**Hardware-aware Edge AI deployment experiments on Qualcomm Snapdragon X Elite, covering model export, ONNX conversion, QNN compilation, NPU execution, model optimization, SLM deployment, and hardware-level performance profiling.**
 
-This repository demonstrates the complete path from **framework-native trained models → portable ONNX graphs → Qualcomm AI Hub compilation → Snapdragon X Elite NPU execution → hardware-level profiling**.
+This repository demonstrates the engineering path from **framework-native AI models → portable model representations → Qualcomm AI Hub → QNN → Snapdragon X Elite → NPU-accelerated inference**.
 
-Rather than validating a single lightweight model, the project uses **two fundamentally different computer vision workloads**:
+The project spans multiple AI workloads rather than a single model:
 
 * 🥔 **CNN image classification** — lightweight, low-latency inference
-* 🌫️ **ResNet-based image restoration** — deeper, compute-intensive dense image-to-image inference
+* 🌫️ **Image restoration** — deeper ResNet-based dense inference
+* 🤖 **Small Language Model (SLM)** — Llama 3.2 1B Instruct for on-device generative AI
 
-The objective is to understand how **architecture, tensor operations, memory requirements, and workload characteristics translate into real edge-device performance**.
-
----
-
-## 🚀 Key Results
-
-### Snapdragon X Elite NPU
-
-| Model                          | Workload             | Architecture               |     Latency | Peak Memory | Execution                   |
-| ------------------------------ | -------------------- | -------------------------- | ----------: | ----------: | --------------------------- |
-| **Potato Disease Classifier**  | Image Classification | CNN                        |  **0.2 ms** |    **2 MB** | **100% NPU**                |
-| **NEXTGEN VISION AI Dehazing** | Image Restoration    | ResNet · 9 Residual Blocks | **18.7 ms** |   **24 MB** | **96/96 NPU compute units** |
-
-> **Both models execute on the Snapdragon X Elite NPU without CPU or GPU fallback.**
-
-These measurements were obtained through **Qualcomm AI Hub Workbench profiling on the target platform**, rather than relying on theoretical hardware specifications.
-
-### Why the difference matters
-
-The approximately **90× latency difference** is not simply a benchmark number — it illustrates an important Edge AI engineering trade-off.
-
-The classifier performs a relatively lightweight categorical prediction, while the dehazing network performs **dense full-resolution image transformation through nine residual blocks**.
-
-This makes the two models useful as complementary deployment experiments:
-
-**Lightweight CNN**
-
-`Input → Feature Extraction → Classification`
-
-vs.
-
-**Image Restoration Network**
-
-`Input → Multiple Residual Blocks → Dense Feature Transformation → Reconstructed Image`
-
-The result is a practical demonstration of how **model architecture and workload complexity directly affect latency and memory on constrained edge hardware**.
+The objective is to understand how **model architecture, operators, memory requirements, graph structure, numerical representation, and workload characteristics translate into real performance on specialized edge silicon.**
 
 ---
 
-# 🎯 What This Project Demonstrates
+# 🔥 What This Repository Demonstrates
 
-This repository focuses on the engineering layer between **model training and real hardware deployment**.
-
-### Edge AI Deployment
-
-* ✅ Exporting trained models from **PyTorch and TensorFlow/Keras**
-* ✅ Converting framework-native models to **ONNX**
-* ✅ Validating ONNX inference against the original framework
-* ✅ Compiling models through the **Qualcomm QNN toolchain**
-* ✅ Deploying to **Snapdragon X Elite**
-* ✅ Profiling inference directly on the target platform
-* ✅ Analyzing **latency, memory consumption, and compute allocation**
-* ✅ Verifying NPU execution rather than assuming acceleration
-* ✅ Troubleshooting real framework/conversion compatibility issues
-
-### Heterogeneous Compute
-
-The deployment workflow is designed around the reality that edge devices contain multiple compute resources:
-
-**CPU → GPU → NPU**
-
-The experiments therefore focus not only on whether a model runs, but **where the computation runs and how efficiently the target hardware executes it**.
+| Capability                  | Demonstrated Work                                   |
+| --------------------------- | --------------------------------------------------- |
+| **Edge AI Deployment**      | Real model deployment on Snapdragon X Elite         |
+| **NPU Acceleration**        | Qualcomm NPU execution and hardware profiling       |
+| **ONNX**                    | TensorFlow/PyTorch → ONNX conversion and validation |
+| **QNN**                     | Qualcomm QNN-based deployment                       |
+| **Qualcomm AI Hub**         | Model compilation and target-platform profiling     |
+| **Computer Vision**         | Classification + image restoration                  |
+| **SLM Deployment**          | Llama 3.2 1B Instruct on-device                     |
+| **Model Optimization**      | Hardware-aware graph and inference optimization     |
+| **Quantized Inference**     | Edge-oriented numerical optimization                |
+| **Heterogeneous Compute**   | CPU / GPU / NPU execution analysis                  |
+| **Performance Engineering** | Latency, memory, throughput and hardware allocation |
+| **Windows on ARM**          | Snapdragon X Elite development environment          |
 
 ---
 
-# 🧠 Deployment Pipeline
+# ⭐ Project Summary
+
+> **From trained computer vision models to on-device generative AI — deployed and profiled on Qualcomm Snapdragon X Elite.**
+
+The repository currently demonstrates three different AI workloads through a hardware-aware deployment workflow:
+
+| Workload                         | Framework / Model      | Deployment Path   | Target         |
+| -------------------------------- | ---------------------- | ----------------- | -------------- |
+| 🥔 Potato Disease Classification | TensorFlow / Keras CNN | ONNX → QNN        | Snapdragon NPU |
+| 🌫️ NEXTGEN VISION AI Dehazing   | PyTorch ResNet         | ONNX → QNN        | Snapdragon NPU |
+| 🤖 Llama 3.2 1B Instruct         | Transformer / SLM      | Qualcomm AI Stack | Snapdragon NPU |
+
+### Demonstrated Edge AI Capabilities
+
+**Model Conversion**
 
 ```text
-                    MODEL TRAINING
-                         │
-              ┌──────────┴──────────┐
-              │                     │
-           PyTorch             TensorFlow/Keras
-              │                     │
-              └──────────┬──────────┘
-                         ▼
-                  ONNX EXPORT
-                         │
-                         ▼
-              ONNX GRAPH VALIDATION
-                         │
-                         ▼
-             Qualcomm AI Hub Workbench
-                         │
-                         ▼
-                  QNN COMPILATION
-                         │
-                         ▼
-               Snapdragon X Elite
-                         │
-              ┌──────────┼──────────┐
-              ▼          ▼          ▼
-            CPU        GPU         NPU
-                                   │
-                                   ▼
-                         Hardware Profiling
-                                   │
-                 ┌─────────────────┼─────────────────┐
-                 ▼                 ▼                 ▼
-              Latency           Memory       Compute Allocation
+TensorFlow / PyTorch
+        ↓
+       ONNX
+```
+
+**Hardware Deployment**
+
+```text
+ONNX
+  ↓
+Qualcomm AI Hub
+  ↓
+QNN
+  ↓
+Snapdragon X Elite
+```
+
+**Hardware Acceleration**
+
+```text
+CPU / GPU / NPU
+        ↓
+Target-aware execution
+        ↓
+Hardware profiling
+```
+
+**Generative Edge AI**
+
+```text
+Llama 3.2 1B Instruct
+        ↓
+Optimization / Deployment
+        ↓
+Snapdragon X Elite
+        ↓
+On-device SLM inference
+```
+
+---
+
+# 🚀 Key Results
+
+## Snapdragon X Elite NPU
+
+| Model                          | Workload             | Architecture               |              Latency | Peak Memory | Execution                   |
+| ------------------------------ | -------------------- | -------------------------- | -------------------: | ----------: | --------------------------- |
+| **Potato Disease Classifier**  | Image Classification | CNN                        |           **0.2 ms** |    **2 MB** | **100% NPU**                |
+| **NEXTGEN VISION AI Dehazing** | Image Restoration    | ResNet · 9 Residual Blocks |          **18.7 ms** |   **24 MB** | **96/96 NPU compute units** |
+| **Llama 3.2 1B Instruct**      | Generative AI        | Transformer / SLM          | On-device deployment |           — | Snapdragon NPU              |
+
+The first two workloads provide measured vision benchmarks. The third extends the repository from conventional computer vision into **on-device generative AI and transformer-based inference**.
+
+The vision measurements were obtained through **Qualcomm AI Hub Workbench profiling on the target platform**, rather than relying solely on theoretical hardware specifications.
+
+---
+
+# 📊 Why the Vision Benchmarks Matter
+
+The approximately **90× latency difference** between the two vision workloads illustrates a fundamental Edge AI engineering principle:
+
+> **Hardware performance is strongly influenced by workload architecture, not simply model size or parameter count.**
+
+The classifier performs a relatively lightweight categorical prediction:
+
+```text
+Input Image
+     ↓
+Feature Extraction
+     ↓
+Classification
+     ↓
+Disease Class
+```
+
+The dehazing model performs dense image-to-image transformation:
+
+```text
+Input Image
+     ↓
+Residual Feature Extraction
+     ↓
+9 Residual Blocks
+     ↓
+Dense Feature Transformation
+     ↓
+Image Reconstruction
+     ↓
+Dehazed Image
+```
+
+This creates substantially different computational and memory characteristics despite both workloads being computer vision models.
+
+---
+
+# 🧠 Deployment Architecture
+
+The complete deployment workflow is:
+
+```text
+                         MODEL DEVELOPMENT
+                                │
+                   ┌────────────┴────────────┐
+                   │                         │
+                PyTorch               TensorFlow/Keras
+                   │                         │
+                   └────────────┬────────────┘
+                                ▼
+                         MODEL EXPORT
+                                │
+                                ▼
+                         ONNX CONVERSION
+                                │
+                                ▼
+                       ONNX GRAPH VALIDATION
+                                │
+                                ▼
+                      QUALCOMM AI HUB
+                                │
+                                ▼
+                         QNN COMPILATION
+                                │
+                                ▼
+                       SNAPDRAGON X ELITE
+                                │
+                    ┌───────────┼───────────┐
+                    │           │           │
+                   CPU         GPU         NPU
+                                            │
+                                            ▼
+                                  HARDWARE PROFILING
+                                            │
+                       ┌────────────────────┼───────────────────┐
+                       ▼                    ▼                   ▼
+                    Latency              Memory          Compute Allocation
+```
+
+The SLM path extends this architecture to transformer-based generative inference:
+
+```text
+Llama 3.2 1B Instruct
+          ↓
+   Model Preparation
+          ↓
+ Qualcomm AI Tooling
+          ↓
+  Optimization / Export
+          ↓
+       QNN Stack
+          ↓
+ Snapdragon X Elite
+          ↓
+   NPU-Accelerated
+   On-Device Inference
 ```
 
 ---
@@ -119,7 +214,7 @@ The experiments therefore focus not only on whether a model runs, but **where th
 
 ## Lightweight CNN → ONNX → Snapdragon NPU
 
-The first deployment uses a CNN trained for **potato leaf disease classification**:
+The first deployment uses a CNN trained for potato leaf disease classification:
 
 * Early Blight
 * Late Blight
@@ -129,13 +224,11 @@ The model was exported from **TensorFlow/Keras → ONNX**, validated for inferen
 
 ### Benchmark
 
-**0.2 ms inference**
+* **0.2 ms inference latency**
+* **2 MB peak memory**
+* **100% NPU execution**
 
-**2 MB peak memory**
-
-**100% NPU execution**
-
-This experiment establishes the baseline for a lightweight vision workload and verifies the complete deployment path from a trained framework model to **hardware-accelerated NPU inference**.
+This experiment establishes the baseline for a lightweight edge workload and verifies the complete path from a trained framework model to **hardware-accelerated NPU inference**.
 
 ### Deployment Flow
 
@@ -155,7 +248,7 @@ Snapdragon X Elite NPU
 0.2 ms / 2 MB
 ```
 
-📁 **Implementation:** [`potato-classifier/`](./potato-classifier)
+📁 **Implementation:** [`potato-classifier/`](https://github.com/ThejaswiniSunil/snapdragon-dehazing-edge-ai/tree/main/potato-classifier)
 
 ---
 
@@ -163,33 +256,34 @@ Snapdragon X Elite NPU
 
 ## PyTorch ResNet → ONNX → QNN → Snapdragon NPU
 
-The second experiment uses the **NEXTGEN VISION AI** dehazing network developed for real-time adverse-weather vision enhancement.
+The second experiment deploys the **NEXTGEN VISION AI** dehazing network developed for real-time adverse-weather vision enhancement.
 
-Unlike the lightweight classifier, this model performs **image-to-image restoration**, requiring dense computation across the input image.
+Unlike the lightweight classifier, the dehazing network performs **dense image-to-image restoration**, requiring significantly more computation across the input image.
 
 ### Architecture
 
-**PyTorch**
-
-→ **ResNet-based architecture**
-
-→ **9 residual blocks**
-
-→ **Dense image transformation**
-
-→ **Dehazed output**
+```text
+PyTorch
+   ↓
+ResNet-based Architecture
+   ↓
+9 Residual Blocks
+   ↓
+Dense Feature Transformation
+   ↓
+Image Reconstruction
+   ↓
+Dehazed Output
+```
 
 ### Benchmark
 
-**18.7 ms inference**
+* **18.7 ms inference latency**
+* **24 MB peak memory**
+* **96/96 NPU compute units allocated**
+* **No CPU/GPU fallback**
 
-**24 MB peak memory**
-
-**96/96 NPU compute units allocated**
-
-**No CPU/GPU fallback**
-
-This deployment acts as the more demanding workload in the experiment, testing whether the conversion and acceleration pipeline remains effective for a substantially deeper vision network rather than only a small classification model.
+This deployment provides a substantially more demanding workload for evaluating the Snapdragon NPU pipeline.
 
 ### Deployment Flow
 
@@ -209,96 +303,233 @@ Snapdragon X Elite NPU
 18.7 ms / 24 MB
 ```
 
-📁 **Implementation:** [`dehazing-model/`](./dehazing-model)
+📁 **Implementation:** [`dehazing-model/`](https://github.com/ThejaswiniSunil/snapdragon-dehazing-edge-ai/tree/main/dehazing-model)
 
 ---
 
-# 📈 What the Benchmarks Reveal
+# 🔬 Experiment 03 — Llama 3.2 1B Instruct
 
-The experiments illustrate several practical principles of Edge AI engineering.
+## Small Language Model → Qualcomm AI Stack → Snapdragon NPU
 
-### 1. Model architecture matters
+The third deployment extends the repository beyond computer vision into **on-device generative AI**.
 
-Two models can solve vision problems while having dramatically different hardware requirements.
+The workload uses **Meta Llama 3.2 1B Instruct**, a compact instruction-tuned Small Language Model (SLM), targeted for execution on the **Qualcomm Snapdragon X Elite**.
 
-A lightweight CNN can achieve sub-millisecond inference, while a deeper image-restoration network requires substantially more computation and memory.
+This introduces a fundamentally different inference workload:
 
-### 2. NPU acceleration is workload-dependent
+```text
+Computer Vision
+      ↓
+Tensor / Image Inference
+      ↓
+Predetermined Output
+```
+
+versus:
+
+```text
+SLM
+ ↓
+Autoregressive Transformer Inference
+ ↓
+Token Generation
+ ↓
+Generated Sequence
+```
+
+The objective is to understand how a transformer-based language model can be prepared, optimized, and deployed for **resource-constrained edge inference**.
+
+---
+
+## 🧠 Why an SLM?
+
+Language-model deployment introduces constraints that differ significantly from conventional image inference.
+
+The experiment therefore considers:
+
+* Model size
+* Memory footprint
+* Quantized / optimized inference
+* NPU compatibility
+* Operator and graph support
+* Hardware-aware execution
+* Token generation
+* Context length
+* CPU/NPU workload placement
+* On-device inference
+
+---
+
+## Model
+
+### Llama 3.2 1B Instruct
+
+The 1B-parameter model provides a practical edge deployment target for investigating transformer inference under device-level compute and memory constraints.
+
+Rather than treating SLM deployment as simply "running an LLM locally", this experiment focuses on the engineering required to make a generative workload compatible with **specialized edge acceleration**.
+
+---
+
+## Qualcomm Deployment Stack
+
+The deployment uses Qualcomm's model tooling and targets:
+
+```text
+Llama 3.2 1B Instruct
+        ↓
+Hugging Face
+        ↓
+Qualcomm qai_hub_models
+        ↓
+Model Preparation / Optimization
+        ↓
+Qualcomm AI Hub
+        ↓
+QNN / Qualcomm AI Stack
+        ↓
+Snapdragon X Elite
+        ↓
+NPU-Accelerated Execution
+        ↓
+On-Device SLM Inference
+```
+
+📁 **Implementation:** `slm-deployment/`
+
+---
+
+## SLM Performance Model
+
+For conventional vision inference, latency is often the primary metric.
+
+For generative models, the performance picture is broader:
+
+```text
+Time to First Token
+        +
+Tokens / Second
+        +
+Memory Footprint
+        +
+Context Length
+        +
+Compute Utilization
+        +
+CPU/NPU Workload Placement
+```
+
+If benchmark measurements are available, they should be reported here rather than using placeholder values.
+
+Example:
+
+| Metric              |    Snapdragon X Elite |
+| ------------------- | --------------------: |
+| Model               | Llama 3.2 1B Instruct |
+| Precision           |        Measured value |
+| Memory              |        Measured value |
+| NPU execution       |       Measured result |
+| Token generation    |   Measured tokens/sec |
+| First-token latency |           Measured ms |
+
+---
+
+# 📈 What the Experiments Reveal
+
+The three deployments demonstrate different dimensions of Edge AI engineering.
+
+## 1. Model architecture matters
+
+A lightweight CNN, a dense image-restoration network, and an autoregressive transformer place very different demands on edge hardware.
+
+```text
+CNN
+ ↓
+Low-latency tensor inference
+
+Image Restoration
+ ↓
+Dense high-compute image transformation
+
+SLM
+ ↓
+Autoregressive token generation
+```
+
+The deployment stack therefore cannot be evaluated using a single benchmark metric.
+
+---
+
+## 2. NPU acceleration is workload-dependent
 
 Successful Edge AI deployment is not simply:
 
-> "Convert model → run on NPU."
+```text
+Convert Model
+      ↓
+Run on NPU
+```
 
-The actual deployment requires understanding:
+A real deployment requires understanding:
 
-* supported operators
-* tensor layouts
-* graph compatibility
-* memory requirements
-* compiler constraints
-* framework interoperability
-* fallback behavior
-* target hardware characteristics
+* Supported operators
+* Tensor layouts
+* Graph compatibility
+* Memory requirements
+* Compiler constraints
+* Runtime behavior
+* Framework interoperability
+* Fallback behavior
+* Target hardware characteristics
 
-### 3. Benchmarking must happen on the target device
+---
 
-Desktop inference performance does not necessarily represent edge performance.
+## 3. Hardware profiling matters
 
-For this reason, the reported measurements are based on **Snapdragon X Elite profiling**, allowing the deployment to be evaluated against the actual target accelerator.
+The important question is not merely:
 
-### 4. Portability requires validation
+> **"Does the model run?"**
 
-ONNX provides an important interoperability layer between training frameworks and deployment runtimes.
+It is:
 
-The workflow therefore validates the converted model before using hardware benchmarks:
+> **"Where does it run, how much hardware does it use, and what performance does that produce?"**
+
+The experiments therefore investigate:
 
 ```text
-Original Model
-      │
-      ├──────────────┐
-      ▼              ▼
-Framework        ONNX Model
-Inference        Inference
-      │              │
-      └──────┬───────┘
-             ▼
-       Numerical Parity
-             │
-             ▼
-      Hardware Deployment
+Model
+ ↓
+Runtime
+ ↓
+CPU / GPU / NPU
+ ↓
+Memory
+ ↓
+Latency
+ ↓
+Hardware Utilization
 ```
 
 ---
 
-# 🛠️ Real Deployment Problems Solved
+## 4. Edge deployment requires validation
 
-The project deliberately documents **deployment engineering problems**, rather than presenting conversion as a one-command process.
+Generating an ONNX file does not prove successful deployment.
 
-### Framework compatibility
+The workflow separates:
 
-Resolved version and interoperability issues involving:
+```text
+Conversion
+   ↓
+Numerical Validation
+   ↓
+Compilation
+   ↓
+Target Hardware Execution
+   ↓
+Performance Profiling
+```
 
-* TensorFlow/Keras versions
-* ONNX conversion tooling
-* SavedModel interoperability
-* framework-specific graph representations
-
-### Tensor and graph compatibility
-
-Investigated and resolved:
-
-* tensor naming mismatches
-* input/output naming differences
-* ONNX graph compatibility
-* framework-native vs deployment-runtime representations
-
-### Validation before benchmarking
-
-The models were not treated as successfully deployed merely because an ONNX file was generated.
-
-The workflow included **inference parity validation** before trusting the edge-device benchmark.
-
-This distinction is important:
+This distinction is central to the repository:
 
 ```text
 "ONNX file generated"
@@ -306,19 +537,102 @@ This distinction is important:
 "Model successfully deployed"
 ```
 
-A successful deployment requires:
+A deployment is treated as successful only when the model can execute correctly on the target platform and its behavior can be measured.
+
+---
+
+# 🛠️ Real Deployment Engineering
+
+This repository documents deployment engineering rather than treating model conversion as a one-command operation.
+
+## Framework Compatibility
+
+The deployment workflow addresses interoperability between:
+
+* TensorFlow/Keras
+* PyTorch
+* ONNX
+* ONNX Runtime
+* Qualcomm AI Hub
+* QNN
+
+This includes investigating version compatibility and framework-specific graph representations.
+
+---
+
+## Tensor and Graph Compatibility
+
+Deployment work includes investigating:
+
+* Input/output naming
+* Tensor shapes
+* Tensor layouts
+* ONNX graph compatibility
+* Operator support
+* Framework-native representations
+* Deployment-runtime representations
+
+---
+
+## Validation Before Benchmarking
+
+The converted models are validated before hardware benchmarks are interpreted.
+
+The workflow is therefore:
 
 ```text
-Conversion
-   +
-Numerical Validation
-   +
-Compilation
-   +
-Target Hardware Execution
-   +
-Performance Profiling
+Original Framework
+        │
+        ├──────────────┐
+        ▼              ▼
+ Framework        ONNX Runtime
+ Inference         Inference
+        │              │
+        └──────┬───────┘
+               ▼
+        Numerical Parity
+               │
+               ▼
+       Hardware Deployment
+               │
+               ▼
+          Profiling
 ```
+
+---
+
+# ⚙️ Model Optimization
+
+The project focuses on optimization at the intersection of **model architecture, numerical representation, graph compilation, and hardware execution**.
+
+Key areas include:
+
+* ONNX graph optimization
+* QNN compilation
+* Quantized inference
+* Memory optimization
+* Operator compatibility
+* NPU execution
+* CPU/NPU workload placement
+* Hardware-aware benchmarking
+
+The objective is not optimization in isolation.
+
+It is:
+
+```text
+Accuracy
+   ↕
+Latency
+   ↕
+Memory
+   ↕
+Throughput
+   ↕
+Hardware Utilization
+```
+
+with the trade-offs measured on the target device whenever possible.
 
 ---
 
@@ -335,56 +649,341 @@ snapdragon-edge-ai-deployment/
 │   ├── submit_to_aihub.py
 │   └── profile_cpu.py
 │
-└── dehazing-model/
-    ├── dehaze_net.py
-    ├── export_dehaze_onnx.py
-    ├── test_dehaze_onnx.py
-    ├── submit_dehaze_to_aihub.py
-    └── profile_dehaze.py
+├── dehazing-model/
+│   ├── dehaze_net.py
+│   ├── export_dehaze_onnx.py
+│   ├── test_dehaze_onnx.py
+│   ├── submit_dehaze_to_aihub.py
+│   └── profile_dehaze.py
+│
+└── slm-deployment/
+    ├── model preparation
+    ├── deployment scripts
+    ├── validation
+    └── profiling
 ```
 
 ---
 
 # 🧰 Technology Stack
 
-### Model Development
+## Model Development
 
-* **Python**
-* **PyTorch**
-* **TensorFlow**
-* **Keras**
+* Python
+* PyTorch
+* TensorFlow
+* Keras
 
-### Model Interoperability
+## Model Interoperability
 
-* **ONNX**
-* **ONNX Runtime**
+* ONNX
+* ONNX Runtime
 
-### Edge Deployment
+## Edge Deployment
 
-* **Qualcomm Snapdragon X Elite**
-* **Qualcomm AI Hub Workbench**
-* **Qualcomm QNN**
-* **Windows on ARM**
+* Qualcomm Snapdragon X Elite
+* Qualcomm AI Hub
+* Qualcomm `qai_hub_models`
+* Qualcomm QNN
+* Windows on ARM
 
-### Profiling
+## Generative AI
+
+* Llama 3.2 1B Instruct
+* Transformer inference
+* Small Language Model deployment
+* On-device generative AI
+
+## Performance Engineering
 
 * NPU execution analysis
 * Inference latency
 * Peak memory
-* Compute-unit allocation
+* Compute allocation
 * CPU/GPU/NPU execution behavior
+* Token-generation performance
 
 ---
 
-# 🔗 Why This Matters for Edge AI
+# 🧠 Heterogeneous Edge Compute
 
-The central engineering question behind this repository is:
+Modern edge devices expose multiple compute resources rather than a single processor.
 
-> **How do you take a model that works in a training environment and turn it into an efficient model that actually runs on specialized edge silicon?**
+This repository treats the platform as a heterogeneous system:
 
-That requires more than model training.
+```text
+                 Snapdragon X Elite
+                        │
+           ┌────────────┼────────────┐
+           │            │            │
+          CPU          GPU          NPU
+           │            │            │
+           └────────────┼────────────┘
+                        │
+                AI Workload
+```
 
-It requires understanding the entire deployment stack:
+The deployment objective is therefore not simply to maximize raw model performance.
+
+It is to understand:
+
+* Which accelerator executes the workload
+* Which operations are supported
+* How memory moves through the system
+* Where fallbacks occur
+* How model architecture affects hardware utilization
+* How deployment decisions affect latency and throughput
+
+This hardware-aware approach is particularly important for **real-time computer vision and on-device generative AI**, where resource constraints directly affect application behavior.
+
+---
+
+# 🔗 From Edge Models to Real Applications
+
+The edge deployments in this repository are connected to larger AI systems rather than existing as isolated benchmarks.
+
+### NEXTGEN VISION AI
+
+The dehazing workload originates from **NEXTGEN VISION AI**, a real-time adverse-weather vision enhancement system.
+
+```text
+Camera / Video
+      ↓
+Image Enhancement
+      ↓
+Dehazing
+      ↓
+Object Detection
+      ↓
+Road / Hazard Understanding
+      ↓
+Real-Time Vision Application
+```
+
+The Snapdragon deployment explores how the computationally intensive vision component can move toward specialized edge acceleration.
+
+### Generative AI
+
+The Llama deployment extends the same hardware-aware philosophy from perception to language:
+
+```text
+Perception
+   ↓
+Computer Vision Models
+   ↓
+NPU
+
+Language
+   ↓
+Small Language Models
+   ↓
+NPU
+```
+
+Together, these experiments explore a broader edge-AI architecture where **multiple classes of AI workloads can execute close to the device rather than relying exclusively on cloud inference**.
+
+---
+
+# 🌐 Broader Edge AI Direction
+
+This repository now covers both **computer vision and generative AI deployment on Qualcomm Snapdragon hardware**.
+
+The progression is:
+
+```text
+                    Snapdragon Edge AI
+                           │
+             ┌─────────────┴─────────────┐
+             │                           │
+        Computer Vision             Generative AI
+             │                           │
+       ┌─────┴─────┐                     │
+       │           │                     │
+   Classifier   Dehazing             Llama 3.2 1B
+       │           │                     │
+   TensorFlow   PyTorch                 SLM
+       │           │                     │
+       └─────┬─────┘                     │
+             │                           │
+            ONNX                  Model Optimization
+             │                           │
+             └────────────┬──────────────┘
+                          │
+                    Qualcomm AI Hub
+                          │
+                         QNN
+                          │
+                   Snapdragon X Elite
+                          │
+                         NPU
+```
+
+The result is a deployment portfolio spanning:
+
+**CNN inference → image restoration → transformer-based SLM inference**
+
+---
+
+# 🔬 Edge AI Engineering Focus
+
+The work in this repository can be viewed as four connected layers:
+
+```text
+┌─────────────────────────────────────┐
+│        AI MODEL DEVELOPMENT         │
+│  CNN · ResNet · Transformer · SLM   │
+└──────────────────┬──────────────────┘
+                   ↓
+┌─────────────────────────────────────┐
+│       MODEL REPRESENTATION          │
+│      ONNX · Graph Optimization      │
+└──────────────────┬──────────────────┘
+                   ↓
+┌─────────────────────────────────────┐
+│       HARDWARE DEPLOYMENT            │
+│   AI Hub · QNN · Snapdragon NPU     │
+└──────────────────┬──────────────────┘
+                   ↓
+┌─────────────────────────────────────┐
+│       PERFORMANCE ENGINEERING       │
+│ Latency · Memory · Throughput · NPU │
+└─────────────────────────────────────┘
+```
+
+This is the core engineering theme of the project:
+
+> **Taking models beyond training and making them measurable, deployable, and efficient on real edge hardware.**
+
+---
+
+# 🔭 Cross-Platform Edge AI
+
+The Qualcomm deployment provides a foundation for extending the same hardware-aware methodology to other accelerator ecosystems.
+
+```text
+Qualcomm Snapdragon
+        │
+        ├── QNN
+        └── NPU
+
+Apple Silicon
+        │
+        ├── Core ML
+        └── MLX
+```
+
+Future cross-platform experiments can investigate how the same model architectures and optimization strategies translate across different hardware and software stacks.
+
+These technologies are treated as **future extension areas unless a corresponding deployment is included in the repository**.
+
+---
+
+# ☁️ Edge + Cloud AI
+
+Edge inference is one component of a broader AI systems architecture.
+
+My wider AI engineering work also covers:
+
+```text
+                   AI SYSTEM
+                       │
+          ┌────────────┴────────────┐
+          │                         │
+        EDGE                      CLOUD
+          │                         │
+    NPU Inference              AI Services
+          │                         │
+    Vision / SLM              Agentic AI
+          │                         │
+          │                       RAG
+          │                         │
+          └────────────┬────────────┘
+                       │
+                Intelligent Routing
+```
+
+This creates opportunities for hybrid architectures such as:
+
+* On-device preprocessing
+* Local vision inference
+* On-device SLM inference
+* Cloud-based reasoning
+* RAG-backed enterprise workflows
+* Intelligent edge/cloud model routing
+
+The broader objective is to understand **where each AI workload should execute based on latency, compute, memory, privacy, connectivity, and workload requirements**.
+
+---
+
+# 🏗️ Engineering Principles
+
+## Measure, don't assume
+
+Hardware acceleration is verified through profiling rather than inferred from the existence of an accelerator.
+
+## Validate before optimizing
+
+Numerical correctness is established before interpreting performance measurements.
+
+## Optimize for the target
+
+A model optimized for desktop inference is not automatically optimized for an NPU.
+
+## Understand the full stack
+
+Edge AI performance is determined by more than the neural network:
+
+```text
+Model
+ +
+Graph
+ +
+Compiler
+ +
+Runtime
+ +
+Memory
+ +
+Accelerator
+ =
+Real Edge AI System
+```
+
+## Deployment is part of model engineering
+
+A trained model is not the final product.
+
+The engineering workflow continues through:
+
+```text
+Training
+   ↓
+Export
+   ↓
+Conversion
+   ↓
+Validation
+   ↓
+Optimization
+   ↓
+Compilation
+   ↓
+Hardware Deployment
+   ↓
+Profiling
+   ↓
+Application Integration
+```
+
+---
+
+# 📌 Why This Repository Matters
+
+The central engineering question behind this project is:
+
+> **How do you take an AI model that works in a training environment and turn it into an efficient workload that actually executes on specialized edge silicon?**
+
+Answering that requires understanding the entire deployment stack:
 
 ```text
 MODEL
@@ -393,148 +992,22 @@ Framework
   ↓
 ONNX
   ↓
-Compiler / Runtime
+Graph / Compiler
+  ↓
+Runtime
   ↓
 Hardware Accelerator
   ↓
 Memory
   ↓
-Latency
+Latency / Throughput
   ↓
 Real-Time Application
 ```
 
 This project therefore sits at the intersection of:
 
-**Computer Vision + Model Optimization + Hardware Acceleration + Edge Deployment**
-
----
-
-# 🧠 Broader Edge AI Direction
-
-This repository represents the **vision-model deployment layer** of a broader AI engineering focus.
-
-The next stage is to extend the same hardware-aware methodology beyond CNNs and image restoration toward:
-
-### Small Language Models
-
-Deploy compact transformer/SLM workloads directly on NPU hardware while evaluating:
-
-* latency
-* memory footprint
-* throughput
-* context length
-* quantization
-* CPU/NPU partitioning
-
-### Quantization
-
-Evaluate:
-
-```text
-FP32
-  ↓
-FP16
-  ↓
-INT8
-  ↓
-Hardware-optimized inference
-```
-
-with explicit measurement of the trade-off between:
-
-**model accuracy ↔ latency ↔ memory ↔ power**
-
-### Cross-platform Edge AI
-
-Extend the same models across:
-
-```text
-Qualcomm Snapdragon
-        │
-        ├── QNN
-        │
-        └── NPU
-              
-Apple Silicon
-        │
-        ├── Core ML
-        │
-        └── MLX
-```
-
-allowing deployment characteristics to be compared across different accelerator ecosystems.
-
----
-
-# 🔮 Roadmap
-
-### Edge Model Optimization
-
-* [ ] INT8 quantization for both deployed models
-* [ ] FP16 vs INT8 accuracy/latency comparison
-* [ ] CPU vs GPU vs NPU benchmark comparison
-* [ ] Operator-level performance investigation
-* [ ] Memory optimization
-
-### Edge Generative AI
-
-* [ ] Deploy a compact LLM/SLM on Snapdragon NPU
-* [ ] Quantized transformer inference
-* [ ] Measure tokens/sec, first-token latency, and memory
-* [ ] Investigate NPU/CPU workload partitioning
-
-### Cross-Platform Deployment
-
-* [ ] Apple Silicon deployment
-* [ ] Core ML conversion
-* [ ] MLX experimentation
-* [ ] Qualcomm vs Apple accelerator comparison
-
-### Edge + Cloud AI
-
-* [ ] Hybrid edge/cloud inference architecture
-* [ ] Intelligent model routing
-* [ ] On-device preprocessing + cloud reasoning
-* [ ] Edge inference integrated with enterprise AI/RAG workflows
-
----
-
-# 🏗️ Engineering Principles
-
-This project follows several principles that guide the deployment experiments:
-
-### **Measure, don't assume**
-
-Hardware acceleration is verified through profiling rather than inferred from the existence of an accelerator.
-
-### **Validate before optimizing**
-
-Numerical correctness is established before interpreting performance measurements.
-
-### **Optimize for the target**
-
-A model optimized for desktop inference is not automatically optimized for an NPU.
-
-### **Treat deployment as part of model engineering**
-
-The model is only one component of the system.
-
-```text
-Model
-+
-Graph
-+
-Compiler
-+
-Runtime
-+
-Memory
-+
-Hardware
-=
-Real Edge AI System
-```
+**Edge AI + Computer Vision + Generative AI + Model Optimization + Hardware Acceleration + Deployment Engineering**
 
 ---
 
@@ -544,9 +1017,9 @@ Real Edge AI System
 
 **AI & Cloud Automation Engineer**
 
-**Edge AI · Computer Vision · Model Deployment · Agentic AI · Cloud Automation**
+**Edge AI · Computer Vision · SLM Deployment · Model Optimization · Agentic AI · RAG · Cloud Automation**
 
-I build AI systems across the model-development and deployment stack — from training and computer vision pipelines to **agentic AI systems, RAG pipelines, cloud automation, and hardware-accelerated inference**.
+I build AI systems across the model-development and deployment stack — from **computer vision and model training to hardware-accelerated inference, Small Language Models, agentic AI systems, RAG pipelines, and cloud automation**.
 
 This repository focuses specifically on the **Edge AI and model deployment side** of that work.
 
@@ -554,32 +1027,47 @@ This repository focuses specifically on the **Edge AI and model deployment side*
 
 ---
 
-# ⭐ Project Summary
+# ⭐ Final Snapshot
 
-> **Two independently trained vision models. Two different computational workloads. One hardware-aware deployment pipeline.**
+> **Trained models → ONNX → Qualcomm AI Hub → QNN → Snapdragon X Elite → NPU → measured hardware performance**
 
-**TensorFlow / PyTorch**
+### Computer Vision
 
-→ **ONNX**
+**Potato Disease CNN**
 
-→ **Qualcomm AI Hub**
+→ **0.2 ms**
 
-→ **QNN**
+→ **2 MB**
+
+→ **100% NPU**
+
+### Image Restoration
+
+**NEXTGEN VISION AI Dehazing**
+
+→ **18.7 ms**
+
+→ **24 MB**
+
+→ **96/96 NPU compute units**
+
+### Generative AI
+
+**Llama 3.2 1B Instruct**
+
+→ **Qualcomm AI Stack**
 
 → **Snapdragon X Elite**
 
-→ **NPU**
+→ **On-device SLM inference**
 
-→ **Measured Hardware Performance**
+---
 
-### Current demonstrated results
-
-**0.2 ms** — Potato Disease CNN
-**18.7 ms** — NEXTGEN VISION AI Dehazing
-**100% NPU** — Classifier
-**96/96 NPU compute units** — Dehazing
-**Zero CPU/GPU fallback**
+## The Engineering Goal
 
 The goal is not simply to make models run on edge hardware.
 
-**The goal is to understand, measure, and optimize how AI models execute on the hardware they are actually deployed to.**
+**The goal is to understand, measure, optimize, and deploy different classes of AI workloads on the hardware they actually execute on.**
+
+**From CNNs to image restoration to Small Language Models — from model training to hardware-accelerated inference.**
+
